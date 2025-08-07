@@ -56,14 +56,25 @@ def admin_login():
 
 @app.route('/admin/login', methods=['POST'])
 def admin_login_post():
-    _usuario=request.form['txtUsuario']
+    _email=request.form['txtEmail']
     _password=request.form['txtPassword']
-    print(_usuario)
-    print(_password)
 
-    if _usuario=="admin" and _password=="admin":
+
+    sql = "SELECT *, count(*) as n_usuario FROM tbl_usuarios WHERE correo=%s AND password=%s"
+    datos = (_email, _password)
+
+    conexion = mysql.connection
+    cursor = conexion.cursor()
+    cursor.execute(sql, datos)
+    lista_usuario = cursor.fetchone()
+    n_usuario=lista_usuario[5]
+
+    if n_usuario==1:
+        session["usuario_id"]=lista_usuario[0]
+        session['usuario_nombre']=lista_usuario[1]
+        session['usuario_email']=lista_usuario[2]
+        session["usuario_rol"]=lista_usuario[4]
         session["login"]=True
-        session["usuario"]="Administrador"
         return redirect("/admin")
 
     return render_template("admin/login.html", mensaje="Acceso denegado")
@@ -120,7 +131,7 @@ def admin_libros_guardar():
 
     conexion=mysql.connection
     cursor=conexion.cursor()
-    cursor. execute(sql, datos)
+    cursor.execute(sql, datos)
     conexion.commit()
 
 
