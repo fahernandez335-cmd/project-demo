@@ -20,6 +20,7 @@
                                 id="txtNombre"
                                 aria-describedby="helpId"
                                 placeholder="Escriba el nombre del libro"
+                                value="{{ registro_libro[1] if registro_libro else ''}}"
                             />
                         </div>
 
@@ -33,6 +34,10 @@
                                 aria-describedby="helpId"
                                 placeholder="Seleccione su Imagen"
                             />
+                            {% if registro_libro and registro_libro[2] %}
+                                <img src="templates/sitio/img/{{  registro_libro[2] }}" alt="Imagen del libro" class="img-thumbnail mt-2" style="max-width: 200px;">
+
+                            {% endif %}
                         </div>
 
                         <div class="mb-3">
@@ -44,16 +49,17 @@
                                 id="txtUrl"
                                 aria-describedby="helpId"
                                 placeholder="Escriba la URL de Descarga"
+                                value="{{ registro_libro[3] if registro_libro else '' }}"
                             />
                         </div>
                         
-                        
+                        <input type="hidden" name="id" value="{{ registro_libro[0] if registro_libro else '' }}">
                         
                         <button
                             type="submit"
                             class="btn btn-primary"
                         >
-                            Agregar
+                           {{ 'Editar' if registro_libro else 'Agregar'}} 
                         </button>
 
 
@@ -111,6 +117,16 @@
                         </td>
                        
                         <td>
+                            <form action="/admin/libros/seleccionar" method="post">
+                                <input value="{{ elemento[0] }}"type="hidden" name="txtID" id="txtID">
+                                <button
+                                    type="submit"
+                                    class="btn btn-info"
+                                >
+                                    Selecionar
+                                </button>
+                            </form>
+                            <br>
                             <form action="/admin/libros/borrar" method="post">
                                 <input value="{{ elemento[0] }}"type="hidden" name="txtID" id="txtID">
                                 <button

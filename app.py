@@ -8,12 +8,11 @@ import os
 app=Flask(__name__)
 app.secret_key="develoteca"
 
-
+# configuración de la base de datos
 app.config['MYSQL_HOST']='127.0.0.1'
 app.config['MYSQL_USER']='root'
 app.config['MYSQL_PASSWORD']=''
 app.config['MYSQL_DB']='demo_db'
-
 mysql = MySQL(app)
 
 @app.route('/')
@@ -95,6 +94,7 @@ def admin_libros_guardar():
     if not 'login' in session:
         return redirect("/admin/login")
 
+    _id=request.form.get('id')
     _nombre=request.form['txtNombre']
     _url=request.form['txtUrl']
     _archivo=request.files['txtImagen']
@@ -105,9 +105,18 @@ def admin_libros_guardar():
     if _archivo.filename!="":
         nuevoNombre=horaActual+"_"+_archivo.filename
         _archivo.save("templates/sitio/img/"+nuevoNombre)
+    else:
+        nuevoNombre=None
 
-    sql="INSERT INTO tbl_libros (ID, nombre, imagen, url) VALUES (NULL,%s, %s, %s);"
-    datos=(_nombre,nuevoNombre,_url)
+    if _id:
+        # Editar el libro existente
+        sql= "UPDATE tbl_libros SET nombre=%s, imagen=%s, url=%s WHERE ID=%s"
+        datos=(_nombre, nuevoNombre,_url,_id)
+
+    else:
+        # Guardar un nuevo libro
+        sql="INSERT INTO tbl_libros (ID, nombre, imagen, url) VALUES (NULL,%s, %s, %s);"
+        datos=(_nombre,nuevoNombre,_url)
 
     conexion=mysql.connection
     cursor=conexion.cursor()
@@ -121,6 +130,27 @@ def admin_libros_guardar():
     print(_archivo)   
 
     return redirect('/admin/libros')
+
+@app.route('/admin/libros/seleccionar', methods=['POST'])
+def admin_libros_seleccionar():
+    
+    if not 'login' in session:
+        return redirect("/admin/login")
+    
+    _id=request.form['txtID']
+    print(_id)
+
+    conexion=mysql.connection
+    cursor=conexion.cursor()
+    cursor.execute("SELECT * FROM tbl_libros WHERE ID=%s", (_id,))
+    libro=cursor.fetchone()
+    print(libro)
+
+    cursor.execute("SELECT * FROM tbl_libros")
+    libros = cursor.fetchall()
+
+    return render_template('admin/libros.html', registro_libro=libro, lista_libros=libros )
+
 
 @app.route('/admin/libros/borrar', methods=['POST'])
 def admin_libros_borrar():
