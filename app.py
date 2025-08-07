@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 from datetime import datetime
 from flask import send_from_directory
 import os
+from flask_paginate import Pagination, get_page_parameter
 
 app=Flask(__name__)
 app.secret_key="develoteca"
@@ -14,6 +15,39 @@ app.config['MYSQL_USER']='root'
 app.config['MYSQL_PASSWORD']=''
 app.config['MYSQL_DB']='demo_db'
 mysql = MySQL(app)
+
+# configuración de Flask-Paginate para paginación
+app.config['PAGINATE_PER_PAGE'] = 5 # número de registros por página
+
+def get_paginated_data(table_name, page=None):
+  
+   # Obtener el número de página actual
+    page = page or int(request.args.get(get_page_parameter(), type=int, default=1))
+
+    # configurar la consulta SQL para obtener los registros con paginación
+    offset = (page -1) * app.config['PAGINATE_PER_PAGE']
+    sql = f"SELECT * FROM {table_name} LIMIT %s, %s"
+    datos = (offset, app.config['PAGINATE_PER_PAGE'])
+
+    conexion = mysql.connection
+    cursor = conexion.cursor()
+    cursor.execute(sql, datos)
+    lista_registros_tabla = cursor.fetchall()
+    print(lista_registros_tabla)
+
+    # Obtener el total de registros para la pagina
+    cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+    total = cursor.fetchone()[0]
+
+    # configurar la paginación
+    pagination = Pagination(
+        page=page,
+        total=total,
+        per_page=app.config['PAGINATE_PER_PAGE'],
+        css_framework='bootstrap4'
+    )
+
+    return lista_registros_tabla, pagination
 
 @app.route('/')
 def inicio():
@@ -90,13 +124,13 @@ def admin_libros():
     if not 'login' in session:
         return redirect("/admin/login")
 
-    conexion = mysql.connection
-    cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM tbl_libros")
-    libros = cursor.fetchall()
-    print(libros)
+    # Obtener el número de página actual
+    page = request.args.get(get_page_parameter(), type=int, default=1)
 
-    return render_template('admin/libros.html', lista_libros=libros)
+    table_name = 'tbl_libros'
+    libros, pagination = get_paginated_data(table_name, page)
+
+    return render_template('admin/libros.html', lista_libros=libros, pagination=pagination)
 
 
 @app.route('/admin/libros/guardar', methods=['POST'])
@@ -142,25 +176,31 @@ def admin_libros_guardar():
 
     return redirect('/admin/libros')
 
-@app.route('/admin/libros/seleccionar', methods=['POST'])
+@app.route('/admin/libros/seleccionar', methods=['POST', 'GET'])
 def admin_libros_seleccionar():
     
     if not 'login' in session:
         return redirect("/admin/login")
     
-    _id=request.form['txtID']
-    print(_id)
+    if request.method == 'POST':
+        _id=request.form['txtID']
+        page = int(request.form['page']) # convertir a entero
+        print(_id)
 
-    conexion=mysql.connection
-    cursor=conexion.cursor()
-    cursor.execute("SELECT * FROM tbl_libros WHERE ID=%s", (_id,))
-    libro=cursor.fetchone()
-    print(libro)
+        conexion=mysql.connection
+        cursor=conexion.cursor()
+        cursor.execute("SELECT * FROM tbl_libros WHERE ID=%s", (_id,))
+        libro=cursor.fetchone()
+        print(libro)
+    else:
+        libro = None
+        page = request.args.get(get_page_parameter(), type=int, default=1)
 
-    cursor.execute("SELECT * FROM tbl_libros")
-    libros = cursor.fetchall()
 
-    return render_template('admin/libros.html', registro_libro=libro, lista_libros=libros )
+    table_name = 'tbl_libros'
+    libros, pagination = get_paginated_data(table_name, page)
+
+    return render_template('admin/libros.html', registro_libro=libro, lista_libros=libros, pagination=pagination)
 
 
 @app.route('/admin/libros/borrar', methods=['POST'])

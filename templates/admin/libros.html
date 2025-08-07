@@ -118,7 +118,9 @@
                        
                         <td>
                             <form action="/admin/libros/seleccionar" method="post">
+                                <input value="{{ request.args.get('page', 1) }}" type="hidden" name="page">
                                 <input value="{{ elemento[0] }}"type="hidden" name="txtID" id="txtID">
+
                                 <button
                                     type="submit"
                                     class="btn btn-info"
@@ -142,6 +144,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {{ pagination.links}}
+                </ul>
+            </nav>
            </div>
            
         </div>
