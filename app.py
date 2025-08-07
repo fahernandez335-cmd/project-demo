@@ -1,10 +1,12 @@
 from flask import Flask
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect, session, send_file, render_template_string
 from flask_mysqldb import MySQL
 from datetime import datetime
 from flask import send_from_directory
 import os
 from flask_paginate import Pagination, get_page_parameter
+from fpdf import FPDF
+import io
 
 app=Flask(__name__)
 app.secret_key="develoteca"
@@ -48,6 +50,25 @@ def get_paginated_data(table_name, page=None):
     )
 
     return lista_registros_tabla, pagination
+
+@app.route('/generar_reporte_pdf')
+def generar_reporte_pdf():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Hola, reporte PDF", ln=True, align='C')
+
+    # Generar el PDF y obtener el contenido como bytes
+    pdf_output = pdf.output(dest='S').encode('latin-1')
+
+    # Crear un objeto BytesIO a partir de los bytes del PDF
+    pdf_bytes_io = io.BytesIO(pdf_output)
+
+    # Mover el puntero al inicio del archivo
+    pdf_bytes_io.seek(0)
+
+    return send_file(pdf_bytes_io, as_attachment=True, download_name='reporte.pdf', mimetype='application/pdf')
+
 
 @app.route('/')
 def inicio():
