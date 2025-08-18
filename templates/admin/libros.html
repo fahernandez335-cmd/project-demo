@@ -7,7 +7,19 @@
             class="col-md-5"
         >
             <div class="card">
-                <div class="card-header">Datos del libro</div>
+                <div class="card-header">Datos del libro
+                    <form action="/admin/libros/generar-reporte-pdf" method="get" class="d-inline float-end">
+                                <input value="{{ request.args.get('page', 1) }}" type="hidden" name="page">
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-info"
+                                >
+                                    Generar reporte
+                                </button>
+                            </form>
+                </div>
+                 
                 <div class="card-body">
                     <form action="/admin/libros/guardar" method="post" enctype="multipart/form-data">
 
