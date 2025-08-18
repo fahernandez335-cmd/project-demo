@@ -60,13 +60,45 @@ def generar_reporte_pdf():
     # crear el PDF
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Reporte de registro", ln=True, align='C')
+    pdf.set_font("Arial", size=8)
+    pdf.cell(200, 10, txt="Reporte de Libros", ln=True, align='C')
 
-    # añadir los datos de los libros al PDF
+    # definir el ancho de las columnas
+    col_width = pdf.w / 5 # ancho de la pagina dividido por el número de columnas
+    
+    # estilo de encabezados de la tabla
+    pdf.set_fill_color(255, 255, 255)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_draw_color(0, 0, 0)
+    pdf.set_line_width(0.2)
+    pdf.ln(10)
+
+    # datos de los encabezados de la tabla
+    pdf.cell(col_width -10, 10, 'ID', border=1, align='C', fill=True)
+    pdf.cell(col_width, 10, 'Nombre', border=1, align='C', fill=True)
+    pdf.cell(col_width, 10, 'Imagen', border=1, align='C', fill=True)
+    pdf.cell(col_width, 10, 'URl', border=1, align='C', fill=True)
+    pdf.ln()
+    
+    # añadir los datos de los libros al PDF a la tabla
     for libro in libros:
-            pdf.cell(200, 10, txt=f"ID: {libro[0]}, Nombre: {libro[1]}, URL: {libro[3]}", ln=True)
-
+            pdf.cell(col_width -10, 10, str(libro[0]), border=1)
+            pdf.cell(col_width, 10, libro[1], border=1)
+            # agregar imagen
+            if libro[2]:
+                imagen_path = f'templates/sitio/img/{libro[2]}'
+                if os.path.exists(imagen_path):
+                    if imagen_path.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
+                        pdf.cell(col_width, 10, '', border=1)
+                        pdf.image(imagen_path, x=pdf.get_x(), y=pdf.get_y(), w=col_width -2)
+                    else:
+                        pdf.cell(col_width, 10, 'Formato no compatible', border=1)
+                else:
+                     pdf.cell(col_width, 10, 'No Image', border=1)
+            else:
+                pdf.cell(col_width, 10, 'No Image', border=1)    
+            pdf.cell(col_width, 10, libro[3], border=1)
+            pdf.ln()
 
     # Generar el PDF y obtener el contenido como bytes
     pdf_output = pdf.output(dest='S').encode('latin-1')
