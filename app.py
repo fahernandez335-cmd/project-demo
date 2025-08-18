@@ -53,10 +53,20 @@ def get_paginated_data(table_name, page=None):
 
 @app.route('/admin/libros/generar-reporte-pdf')
 def generar_reporte_pdf():
+    # obtener los datos de la tabla
+    table_name = 'tbl_libros'
+    libros, _ = get_paginated_data(table_name)
+
+    # crear el PDF
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Hola, reporte PDF", ln=True, align='C')
+    pdf.cell(200, 10, txt="Reporte de registro", ln=True, align='C')
+
+    # añadir los datos de los libros al PDF
+    for libro in libros:
+            pdf.cell(200, 10, txt=f"ID: {libro[0]}, Nombre: {libro[1]}, URL: {libro[3]}", ln=True)
+
 
     # Generar el PDF y obtener el contenido como bytes
     pdf_output = pdf.output(dest='S').encode('latin-1')
@@ -67,7 +77,7 @@ def generar_reporte_pdf():
     # Mover el puntero al inicio del archivo
     pdf_bytes_io.seek(0)
 
-    return send_file(pdf_bytes_io, as_attachment=True, download_name='reporte.pdf', mimetype='application/pdf')
+    return send_file(pdf_bytes_io, as_attachment=True, download_name='reporte_libros.pdf', mimetype='application/pdf')
 
 
 @app.route('/')
