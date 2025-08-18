@@ -51,7 +51,7 @@ def get_paginated_data(table_name, page=None):
 
     return lista_registros_tabla, pagination
 
-@app.route('/generar_reporte_pdf')
+@app.route('/admin/libros/generar-reporte-pdf')
 def generar_reporte_pdf():
     pdf = FPDF()
     pdf.add_page()
