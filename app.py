@@ -77,14 +77,15 @@ def generar_reporte_pdf():
     # datos de los encabezados de la tabla
     pdf.cell(col_width -10, 10, 'ID', border=1, align='C', fill=True)
     pdf.cell(col_width, 10, 'Nombre', border=1, align='C', fill=True)
-    pdf.cell(col_width, 10, 'Imagen', border=1, align='C', fill=True)
     pdf.cell(col_width, 10, 'URl', border=1, align='C', fill=True)
+    pdf.cell(col_width, 10, 'Imagen', border=1, align='C', fill=True)
     pdf.ln()
     
     # añadir los datos de los libros al PDF a la tabla
     for libro in libros:
             pdf.cell(col_width -10, 10, str(libro[0]), border=1)
             pdf.cell(col_width, 10, libro[1], border=1)
+            pdf.cell(col_width, 10, libro[3], border=1)
             # agregar imagen
             if libro[2]:
                 imagen_path = f'templates/sitio/img/{libro[2]}'
@@ -98,7 +99,6 @@ def generar_reporte_pdf():
                      pdf.cell(col_width, 10, 'No Image', border=1)
             else:
                 pdf.cell(col_width, 10, 'No Image', border=1)    
-            pdf.cell(col_width, 10, libro[3], border=1)
             pdf.ln()
 
     # Generar el PDF y obtener el contenido como bytes
