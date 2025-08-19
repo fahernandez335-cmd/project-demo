@@ -13,6 +13,7 @@ app.secret_key="develoteca"
 
 # configuración de la base de datos
 app.config['MYSQL_HOST']='127.0.0.1'
+app.config['MYSQL_PORT']= 3306  # configuración de puerto
 app.config['MYSQL_USER']='root'
 app.config['MYSQL_PASSWORD']=''
 app.config['MYSQL_DB']='demo_db'
